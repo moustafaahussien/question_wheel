@@ -119,6 +119,16 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
+
+  .author-signature {
+    position: absolute;
+    bottom: 5px;
+    font-size: 0.5rem;
+    color: #f2f2f2; /* لون فاتح جداً يكاد يكون غير مرئي */
+    letter-spacing: 0.05em;
+    font-family: sans-serif;
+    user-select: none; /* يمنع تحديده بالماوس بسهولة */
+  }
 </style>
 </head>
 <body>
@@ -169,6 +179,8 @@
 </div>
 
 <div class="footer-note">تأكد من تشغيل الصوت في جهازك 🔊</div>
+
+<div class="author-signature">By Moustafa Hussien</div>
 
 <script>
 const CX = 250, CY = 250;
@@ -240,7 +252,7 @@ function buildRing(groupId, items, r1, r2, bgFill, textFill, strokeColor) {
     path.setAttribute('d', arcPath(r1+1, r2-1, a0, a1));
     path.setAttribute('fill', bgFill);
     path.setAttribute('stroke', strokeColor);
-    path.setAttribute('stroke-width', '1.5'); // زيادة السُمك ليكون الخط أوضح
+    path.setAttribute('stroke-width', '1.5'); 
     path.setAttribute('data-idx', i);
     path.classList.add('seg-path');
     g.appendChild(path);
@@ -286,9 +298,8 @@ function buildTicks() {
 
 function buildAll() {
   buildTicks();
-  // تعديل لون الخطوط (strokeColor) ليكون أغمق وواضح
-  buildRing('innerRing', innerItems, R_IN1, R_IN2, innerBG, '#7fb820', '#b5d98a'); // خطوط خضراء أغمق
-  buildRing('outerRing', outerItems, R_OUT1, R_OUT2, outerBG, '#3870e0', '#a0c1f2'); // خطوط زرقاء أغمق
+  buildRing('innerRing', innerItems, R_IN1, R_IN2, innerBG, '#7fb820', '#b5d98a'); 
+  buildRing('outerRing', outerItems, R_OUT1, R_OUT2, outerBG, '#3870e0', '#a0c1f2'); 
 }
 
 function applyRotation() {
