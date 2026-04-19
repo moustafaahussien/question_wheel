@@ -23,13 +23,31 @@
     color: #1a1a1a;
   }
 
-  .top-right-logo {
+  /* حاوية اللوجوهات لضمان المحاذاة الدقيقة */
+  .header-logos {
     position: absolute;
     top: 15px;
+    left: 20px;
     right: 20px;
-    width: clamp(70px, 15vw, 110px); 
-    height: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* هذه الخاصية تضمن المحاذاة في نفس الخط الأفقي */
     z-index: 1000;
+    pointer-events: none; /* لتجنب حجب أي نقرات في المنتصف */
+  }
+
+  .header-logos img {
+    pointer-events: auto; /* إعادة تفعيل النقرات للصور نفسها إذا لزم الأمر */
+  }
+
+  .top-right-logo {
+    width: clamp(70px, 15vw, 100px); 
+    height: auto;
+  }
+
+  .top-left-logo {
+    width: clamp(90px, 20vw, 130px); 
+    height: auto;
   }
 
   .title {
@@ -124,16 +142,19 @@
     position: absolute;
     bottom: 5px;
     font-size: 0.5rem;
-    color: #f2f2f2; /* لون فاتح جداً يكاد يكون غير مرئي */
+    color: #f2f2f2; 
     letter-spacing: 0.05em;
     font-family: sans-serif;
-    user-select: none; /* يمنع تحديده بالماوس بسهولة */
+    user-select: none; 
   }
 </style>
 </head>
 <body>
 
-<img src="DASC_Logos_DASC_General.png" alt="مدارس دار الذكر" class="top-right-logo">
+<div class="header-logos">
+  <img src="Rethinkers.jpeg" alt="Rethinkers" class="top-left-logo">
+  <img src="DASC_Logos_DASC_General.png" alt="مدارس دار الذكر" class="top-right-logo">
+</div>
 
 <div class="title">✦ Question Wheel ✦</div>
 <div class="subtitle">اضغط على المركز لتشغيل عجلة الأسئلة</div>
