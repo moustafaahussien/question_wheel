@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>عجلة الأسئلة ✦ Question Wheel</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    position: relative; 
+    height: 100dvh; 
+    overflow: hidden; 
+    background: #ffffff; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5vh; 
+    padding: 10px;
+    font-family: 'Cairo', sans-serif;
+    color: #1a1a1a;
+  }
+
+  .top-right-logo {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    width: clamp(70px, 15vw, 110px); 
+    height: auto;
+    z-index: 1000;
+  }
+
+  .title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.2rem, 4.5vw, 1.5rem);
+    color: #3870e0; 
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    text-align: center;
+    font-weight: 700;
+  }
+
+  .subtitle {
+    font-family: 'Amiri', serif;
+    font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+    color: #24a3b3; 
+    direction: rtl;
+    margin-top: -0.5vh;
+  }
+
+  .wheel-wrap {
+    position: relative;
+    width: min(460px, 94vw, 60dvh); 
+    height: min(460px, 94vw, 60dvh);
+  }
+
+  .wheel-wrap svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    filter: drop-shadow(0 8px 20px rgba(56, 112, 224, 0.12)); 
+  }
+
+  #centerGroup { cursor: pointer; }
+  #centerGroup:hover .c-main { filter: brightness(1.1); }
+  #centerGroup:active .c-main { transform-origin: 250px 250px; transform: scale(0.96); }
+
+  .result-box {
+    width: min(460px, 94vw); 
+    min-height: 85px; 
+    background: #ffffff; 
+    border: 2px solid #eef2f9; 
+    border-radius: 14px; 
+    padding: 12px 15px; 
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(56, 112, 224, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .result-en {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.5rem, 5.5vw, 1.8rem); 
+    color: #3870e0; 
+    font-weight: 700;
+  }
+
+  .result-ar {
+    font-family: 'Amiri', serif;
+    font-size: clamp(1.3rem, 5vw, 1.6rem); 
+    color: #7fb820; 
+    direction: rtl;
+    font-weight: 700;
+  }
+
+  .hint { color: #24a3b3; font-size: 0.9rem; font-weight: 600; }
+
+  .footer-note {
+    color: #999;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+</style>
+</head>
+<body>
+
+<img src="DASC_Logos_DASC_General.png" alt="مدارس دار الذكر" class="top-right-logo">
+
+<div class="title">✦ Question Wheel ✦</div>
+<div class="subtitle">اضغط على المركز لتشغيل عجلة الأسئلة</div>
+
+<div class="wheel-wrap">
+<svg id="wheelSvg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <radialGradient id="bgGrad" cx="50%" cy="40%" r="55%">
+    <stop offset="0%" stop-color="#ffffff"/>
+    <stop offset="100%" stop-color="#f2f7fc"/>
+  </radialGradient>
+  
+  <radialGradient id="cGrad" cx="38%" cy="33%" r="65%">
+    <stop offset="0%" stop-color="#35c5d6"/>
+    <stop offset="100%" stop-color="#3870e0"/>
+  </radialGradient>
+</defs>
+
+<circle cx="250" cy="250" r="238" fill="url(#bgGrad)" stroke="#e2e8f0" stroke-width="1"/>
+
+<g id="tickMarks"></g>
+<g id="outerRing"></g>
+<g id="innerRing"></g>
+
+<circle cx="250" cy="250" r="225" fill="none" stroke="#35c5d6" stroke-width="1.5" opacity="0.6"/>
+<circle cx="250" cy="250" r="145" fill="none" stroke="#9add37" stroke-width="1.5" opacity="0.6"/>
+<circle cx="250" cy="250" r="66"  fill="none" stroke="#3870e0" stroke-width="1.5" opacity="0.5"/>
+
+<g id="centerGroup" onclick="startSpin()">
+  <circle cx="250" cy="250" r="64" class="c-main" fill="url(#cGrad)" stroke="#ffffff" stroke-width="3"/>
+  <text x="250" y="240" text-anchor="middle" font-family="Cinzel,serif" font-size="18" font-weight="700" fill="#ffffff" letter-spacing="3.5">SPIN</text>
+  <text x="250" y="265" text-anchor="middle" font-family="Cairo,sans-serif" font-size="15" font-weight="600" fill="#e0f2fe">اضغط</text>
+</g>
+
+<polygon points="250,26 243,8 257,8" fill="#3870e0" />
+<polygon points="250,106 244,89 256,89" fill="#9add37" />
+
+</svg>
+</div>
+
+<div class="result-box" id="resultBox">
+  <div class="hint">اضغط على الدائرة الوسطى للبدء</div>
+</div>
+
+<div class="footer-note">تأكد من تشغيل الصوت في جهازك 🔊</div>
+
+<script>
+const CX = 250, CY = 250;
+const R_IN1  = 68,  R_IN2  = 143;
+const R_OUT1 = 147, R_OUT2 = 223;
+const N = 6, SEG = 360 / N;
+
+const innerItems = ['did','is','can','might','will','would'];
+const outerItems = ['How','Where/When','Who','Which','What','Why'];
+
+const innerPalette = ['#ffffff', '#fdfdfd', '#fafafa', '#f7f7f7', '#f5f5f5', '#f2f2f2'];
+const outerPalette = ['#fcfcfc', '#f9f9f9', '#f6f6f6', '#f3f3f3', '#f0f0f0', '#ededed'];
+
+let innerAngle = 0, outerAngle = 0;
+let isSpinning = false;
+
+let audioCtx;
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+function playTick() {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(450, audioCtx.currentTime); 
+  osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.05); 
+  
+  gain.gain.setValueAtTime(0.3, audioCtx.currentTime); 
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05); 
+  
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.05);
+}
+
+const svg_ns = 'http://www.w3.org/2000/svg';
+function el(tag) { return document.createElementNS(svg_ns, tag); }
+
+function pt(r, deg) {
+  const rad = (deg - 90) * Math.PI / 180;
+  return [CX + r * Math.cos(rad), CY + r * Math.sin(rad)];
+}
+
+function arcPath(r1, r2, a0, a1) {
+  const [x1,y1]=pt(r2,a0), [x2,y2]=pt(r2,a1);
+  const [x3,y3]=pt(r1,a1), [x4,y4]=pt(r1,a0);
+  const lg = a1-a0 > 180 ? 1 : 0;
+  return `M${x1},${y1} A${r2},${r2} 0 ${lg},1 ${x2},${y2} L${x3},${y3} A${r1},${r1} 0 ${lg},0 ${x4},${y4} Z`;
+}
+
+function buildRing(groupId, items, r1, r2, palette, textFill, strokeColor) {
+  const g = document.getElementById(groupId);
+  g.innerHTML = '';
+  const midR = (r1 + r2) / 2;
+
+  for (let i = 0; i < N; i++) {
+    const a0 = i * SEG - SEG / 2;
+    const a1 = a0 + SEG;
+    const aMid = i * SEG;
+
+    const path = el('path');
+    path.setAttribute('d', arcPath(r1+1, r2-1, a0, a1));
+    path.setAttribute('fill', palette[i]);
+    path.setAttribute('stroke', strokeColor);
+    path.setAttribute('stroke-width', '0.5');
+    path.setAttribute('data-idx', i);
+    path.classList.add('seg');
+    g.appendChild(path);
+
+    const [tx,ty] = pt(midR, aMid);
+    const txt = el('text');
+    txt.setAttribute('x', tx); txt.setAttribute('y', ty);
+    txt.setAttribute('text-anchor', 'middle');
+    txt.setAttribute('dominant-baseline', 'middle');
+    txt.setAttribute('font-family', 'Cinzel,serif');
+    
+    const label = items[i];
+    const fs = label.length >= 8 ? 14 : label.length >= 6 ? 16 : 19;
+    
+    txt.setAttribute('font-size', fs);
+    txt.setAttribute('font-weight', '700');
+    txt.setAttribute('fill', textFill);
+    
+    const rot = aMid > 90 && aMid < 270 ? aMid + 180 : aMid;
+    txt.setAttribute('transform', `rotate(${rot},${tx},${ty})`);
+    txt.textContent = label;
+    g.appendChild(txt);
+  }
+}
+
+function buildTicks() {
+  const g = document.getElementById('tickMarks');
+  g.innerHTML = '';
+  for (let i = 0; i < 72; i++) {
+    const a = i * 5;
+    const isMajor = i % 9 === 0;
+    const r1 = isMajor ? 230 : 234;
+    const [x1,y1] = pt(r1, a);
+    const [x2,y2] = pt(238, a);
+    const ln = el('line');
+    ln.setAttribute('x1',x1); ln.setAttribute('y1',y1);
+    ln.setAttribute('x2',x2); ln.setAttribute('y2',y2);
+    ln.setAttribute('stroke', isMajor ? '#35c5d6' : '#e2e8f0');
+    ln.setAttribute('stroke-width', isMajor ? '1.5' : '1');
+    g.appendChild(ln);
+  }
+}
+
+function buildAll() {
+  buildTicks();
+  buildRing('innerRing', innerItems, R_IN1, R_IN2, innerPalette, '#7fb820', '#e2e8f0');
+  buildRing('outerRing', outerItems, R_OUT1, R_OUT2, outerPalette, '#3870e0', '#e2e8f0');
+}
+
+function applyRotation() {
+  document.getElementById('innerRing').setAttribute('transform', `rotate(${innerAngle},${CX},${CY})`);
+  document.getElementById('outerRing').setAttribute('transform', `rotate(${-outerAngle},${CX},${CY})`);
+}
+
+function topIndex(angle, clockwise) {
+  const norm = clockwise ? (((-angle % 360) + 360) % 360) : (((angle % 360) + 360) % 360);
+  return Math.round(norm / SEG) % N;
+}
+
+function highlight(groupId, idx, color) {
+  const segs = document.querySelectorAll(`#${groupId} .seg`);
+  segs.forEach(s => {
+    if (parseInt(s.getAttribute('data-idx')) === idx) {
+      s.setAttribute('fill', color);
+      s.setAttribute('stroke-width', '1.5');
+    }
+  });
+}
+
+function startSpin() {
+  if (isSpinning) return;
+  isSpinning = true;
+
+  initAudio(); 
+
+  buildAll();
+  const box = document.getElementById('resultBox');
+  box.innerHTML = '<div class="hint">جاري البحث عن سؤال... ⟳</div>';
+
+  // تحديد مدة الدوران لـ 4.5 ثانية
+  const duration = 4500; 
+  
+  // تقليل عدد اللفات إلى النصف (720 درجة + مسافة عشوائية تصل إلى 360 درجة إضافية)
+  const innerSpin = 720 + Math.random() * 360; 
+  const outerSpin = 720 + Math.random() * 360; 
+
+  const t0 = performance.now();
+  const i0 = innerAngle, o0 = outerAngle;
+
+  let lastTick = Math.floor(o0 / 15); 
+
+  function step(now) {
+    const t = Math.min((now - t0) / duration, 1);
+    const e = 1 - Math.pow(1 - t, 4);
+    
+    innerAngle = i0 + innerSpin * e;
+    outerAngle = o0 + outerSpin * e;
+    
+    applyRotation();
+
+    const currentTick = Math.floor(outerAngle / 15);
+    if (currentTick > lastTick) {
+      playTick();
+      lastTick = currentTick;
+    }
+
+    if (t < 1) requestAnimationFrame(step);
+    else { isSpinning = false; onSpinEnd(); }
+  }
+  requestAnimationFrame(step);
+}
+
+function onSpinEnd() {
+  const iIdx = topIndex(innerAngle, true);
+  const oIdx = topIndex(outerAngle, false);
+
+  highlight('innerRing', iIdx, '#f1f8e6');
+  highlight('outerRing', oIdx, '#ebf2fd');
+
+  setTimeout(playTick, 100);
+
+  const innerWord = innerItems[iIdx];
+  const outerWord = outerItems[oIdx];
+  const sentence  = `${outerWord} ${innerWord}?`;
+
+  const box = document.getElementById('resultBox');
+  box.innerHTML = `<div class="result-en">${sentence}</div><div class="hint">جاري الترجمة...</div>`;
+
+  fetchTranslation(outerWord, innerWord).then(ar => {
+    box.innerHTML = `<div class="result-en">${sentence}</div><div class="result-ar">${ar}</div>`;
+  });
+}
+
+async function fetchTranslation(qWord, auxWord) {
+  await new Promise(r => setTimeout(r, 600));
+  const key = `${qWord} ${auxWord}`.toLowerCase();
+  const translations = {
+        "how did": "كيف حدث ذلك؟", "how is": "كيف يكون؟", "how can": "كيف يمكن؟", "how might": "كيف قد يحدث؟", "how will": "كيف سوف يحدث؟", "how would": "كيف يمكن أن يحدث؟",
+        "where/when did": "أين أو متى حدث؟", "where/when is": "أين أو متى يكون؟", "where/when can": "أين أو متى يمكن؟", "where/when might": "أين أو متى قد يحدث؟", "where/when will": "أين أو متى سوف يحدث؟", "where/when would": "أين أو متى يمكن أن يحدث؟",
+        "who did": "من فعل؟", "who is": "من هو؟", "who can": "من يستطيع؟", "who might": "من قد يكون؟", "who will": "من سوف يكون؟", "who would": "من يمكن أن يكون؟",
+        "which did": "أي واحد حدث؟", "which is": "أي واحد هو؟", "which can": "أي واحد يستطيع؟", "which might": "أي واحد قد يكون؟", "which will": "أي واحد سيكون؟", "which would": "أي واحد يمكن أن يكون؟",
+        "what did": "ماذا حدث؟", "what is": "ما هو؟", "what can": "ماذا يمكن؟", "what might": "ماذا قد يحدث؟", "what will": "ماذا سوف يحدث؟", "what would": "ماذا يمكن أن يحدث؟",
+        "why did": "لماذا حدث؟", "why is": "لماذا هو؟", "why can": "لماذا يمكن؟", "why might": "لماذا قد يحدث؟", "why will": "لماذا سوف يحدث؟", "why would": "لماذا يمكن أن يحدث؟"
+  };
+  return translations[key] || `${qWord} ${auxWord}`;
+}
+
+buildAll();
+applyRotation();
+</script>
+</body>
+</html>
