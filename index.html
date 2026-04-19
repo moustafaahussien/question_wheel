@@ -192,7 +192,7 @@ function playTick() {
   osc.frequency.setValueAtTime(450, audioCtx.currentTime); 
   osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.05); 
   
-  gain.gain.setValueAtTime(1.0, audioCtx.currentTime); 
+  gain.gain.setValueAtTime(1.5, audioCtx.currentTime); 
   gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05); 
   
   osc.connect(gain);
