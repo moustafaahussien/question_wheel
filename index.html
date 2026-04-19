@@ -60,12 +60,25 @@
     width: 100%;
     height: 100%;
     overflow: visible;
-    filter: drop-shadow(0 8px 20px rgba(56, 112, 224, 0.12)); 
   }
 
   #centerGroup { cursor: pointer; }
   #centerGroup:hover .c-main { filter: brightness(1.1); }
   #centerGroup:active .c-main { transform-origin: 250px 250px; transform: scale(0.96); }
+
+  /* تأثير التظليل المبهر (الومض) */
+  @keyframes winnerGlow {
+    0% { filter: brightness(1) drop-shadow(0 0 0px rgba(255,255,255,0)); }
+    50% { filter: brightness(1.3) drop-shadow(0 0 15px rgba(255,255,255,0.8)); }
+    100% { filter: brightness(1) drop-shadow(0 0 0px rgba(255,255,255,0)); }
+  }
+
+  .winner-animate {
+    animation: winnerGlow 0.8s ease-in-out infinite;
+    stroke: #fff !important;
+    stroke-width: 3px !important;
+    z-index: 10;
+  }
 
   .result-box {
     width: min(460px, 94vw); 
@@ -166,8 +179,8 @@ const N = 6, SEG = 360 / N;
 const innerItems = ['did','is','can','might','will','would'];
 const outerItems = ['How','Where/When','Who','Which','What','Why'];
 
-const innerPalette = ['#ffffff', '#fdfdfd', '#fafafa', '#f7f7f7', '#f5f5f5', '#f2f2f2'];
-const outerPalette = ['#fcfcfc', '#f9f9f9', '#f6f6f6', '#f3f3f3', '#f0f0f0', '#ededed'];
+const innerBG = '#f5fff0'; 
+const outerBG = '#f0f7ff'; 
 
 let innerAngle = 0, outerAngle = 0;
 let isSpinning = false;
@@ -187,17 +200,13 @@ function playTick() {
   if (!audioCtx) return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
-  
   osc.type = 'triangle';
   osc.frequency.setValueAtTime(450, audioCtx.currentTime); 
   osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.05); 
-  
-  gain.gain.setValueAtTime(1.5, audioCtx.currentTime); 
+  gain.gain.setValueAtTime(1.0, audioCtx.currentTime); 
   gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05); 
-  
   osc.connect(gain);
   gain.connect(audioCtx.destination);
-  
   osc.start();
   osc.stop(audioCtx.currentTime + 0.05);
 }
@@ -217,7 +226,7 @@ function arcPath(r1, r2, a0, a1) {
   return `M${x1},${y1} A${r2},${r2} 0 ${lg},1 ${x2},${y2} L${x3},${y3} A${r1},${r1} 0 ${lg},0 ${x4},${y4} Z`;
 }
 
-function buildRing(groupId, items, r1, r2, palette, textFill, strokeColor) {
+function buildRing(groupId, items, r1, r2, bgFill, textFill, strokeColor) {
   const g = document.getElementById(groupId);
   g.innerHTML = '';
   const midR = (r1 + r2) / 2;
@@ -229,11 +238,11 @@ function buildRing(groupId, items, r1, r2, palette, textFill, strokeColor) {
 
     const path = el('path');
     path.setAttribute('d', arcPath(r1+1, r2-1, a0, a1));
-    path.setAttribute('fill', palette[i]);
+    path.setAttribute('fill', bgFill);
     path.setAttribute('stroke', strokeColor);
-    path.setAttribute('stroke-width', '0.5');
+    path.setAttribute('stroke-width', '1.5'); // زيادة السُمك ليكون الخط أوضح
     path.setAttribute('data-idx', i);
-    path.classList.add('seg');
+    path.classList.add('seg-path');
     g.appendChild(path);
 
     const [tx,ty] = pt(midR, aMid);
@@ -242,6 +251,8 @@ function buildRing(groupId, items, r1, r2, palette, textFill, strokeColor) {
     txt.setAttribute('text-anchor', 'middle');
     txt.setAttribute('dominant-baseline', 'middle');
     txt.setAttribute('font-family', 'Cinzel,serif');
+    txt.setAttribute('data-idx', i);
+    txt.classList.add('seg-text');
     
     const label = items[i];
     const fs = label.length >= 8 ? 14 : label.length >= 6 ? 16 : 19;
@@ -249,9 +260,7 @@ function buildRing(groupId, items, r1, r2, palette, textFill, strokeColor) {
     txt.setAttribute('font-size', fs);
     txt.setAttribute('font-weight', '700');
     txt.setAttribute('fill', textFill);
-    
-    const rot = aMid > 90 && aMid < 270 ? aMid + 180 : aMid;
-    txt.setAttribute('transform', `rotate(${rot},${tx},${ty})`);
+    txt.setAttribute('transform', `rotate(${aMid},${tx},${ty})`);
     txt.textContent = label;
     g.appendChild(txt);
   }
@@ -277,8 +286,9 @@ function buildTicks() {
 
 function buildAll() {
   buildTicks();
-  buildRing('innerRing', innerItems, R_IN1, R_IN2, innerPalette, '#7fb820', '#e2e8f0');
-  buildRing('outerRing', outerItems, R_OUT1, R_OUT2, outerPalette, '#3870e0', '#e2e8f0');
+  // تعديل لون الخطوط (strokeColor) ليكون أغمق وواضح
+  buildRing('innerRing', innerItems, R_IN1, R_IN2, innerBG, '#7fb820', '#b5d98a'); // خطوط خضراء أغمق
+  buildRing('outerRing', outerItems, R_OUT1, R_OUT2, outerBG, '#3870e0', '#a0c1f2'); // خطوط زرقاء أغمق
 }
 
 function applyRotation() {
@@ -291,12 +301,21 @@ function topIndex(angle, clockwise) {
   return Math.round(norm / SEG) % N;
 }
 
-function highlight(groupId, idx, color) {
-  const segs = document.querySelectorAll(`#${groupId} .seg`);
-  segs.forEach(s => {
-    if (parseInt(s.getAttribute('data-idx')) === idx) {
-      s.setAttribute('fill', color);
-      s.setAttribute('stroke-width', '1.5');
+function applyHighlight(groupId, idx, activeColor) {
+  const paths = document.querySelectorAll(`#${groupId} .seg-path`);
+  const texts = document.querySelectorAll(`#${groupId} .seg-text`);
+  
+  paths.forEach(p => {
+    if (parseInt(p.getAttribute('data-idx')) === idx) {
+      p.setAttribute('fill', activeColor);
+      p.classList.add('winner-animate');
+    }
+  });
+
+  texts.forEach(t => {
+    if (parseInt(t.getAttribute('data-idx')) === idx) {
+      t.setAttribute('fill', '#ffffff'); 
+      t.setAttribute('font-size', '22'); 
     }
   });
 }
@@ -304,40 +323,30 @@ function highlight(groupId, idx, color) {
 function startSpin() {
   if (isSpinning) return;
   isSpinning = true;
-
   initAudio(); 
-
   buildAll();
   const box = document.getElementById('resultBox');
   box.innerHTML = '<div class="hint">جاري البحث عن سؤال... ⟳</div>';
 
-  // تحديد مدة الدوران لـ 4.5 ثانية
   const duration = 4500; 
-  
-  // تقليل عدد اللفات إلى النصف (720 درجة + مسافة عشوائية تصل إلى 360 درجة إضافية)
   const innerSpin = 720 + Math.random() * 360; 
   const outerSpin = 720 + Math.random() * 360; 
 
   const t0 = performance.now();
   const i0 = innerAngle, o0 = outerAngle;
-
   let lastTick = Math.floor(o0 / 15); 
 
   function step(now) {
     const t = Math.min((now - t0) / duration, 1);
     const e = 1 - Math.pow(1 - t, 4);
-    
     innerAngle = i0 + innerSpin * e;
     outerAngle = o0 + outerSpin * e;
-    
     applyRotation();
-
     const currentTick = Math.floor(outerAngle / 15);
     if (currentTick > lastTick) {
       playTick();
       lastTick = currentTick;
     }
-
     if (t < 1) requestAnimationFrame(step);
     else { isSpinning = false; onSpinEnd(); }
   }
@@ -348,8 +357,8 @@ function onSpinEnd() {
   const iIdx = topIndex(innerAngle, true);
   const oIdx = topIndex(outerAngle, false);
 
-  highlight('innerRing', iIdx, '#f1f8e6');
-  highlight('outerRing', oIdx, '#ebf2fd');
+  applyHighlight('innerRing', iIdx, '#7fb820'); 
+  applyHighlight('outerRing', oIdx, '#3870e0'); 
 
   setTimeout(playTick, 100);
 
